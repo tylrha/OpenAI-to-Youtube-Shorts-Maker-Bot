@@ -1,3 +1,5 @@
+
+
 import concurrent.futures
 import openai, os, random, time
 from gtts import gTTS
@@ -7,13 +9,26 @@ from pytube import Playlist, YouTube
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 
-openai.api_key = "Your aPI Key"
+openai.api_key = "Your Key Here"
 videoHeight = 1920
 
 
 audiopath = 'tts/'
 videopath = 'finalvideo/'
 
+mainMenu = '''
+    1. Make Audio from list in q.txt
+    2. Input a question manually to make audio
+    3. Make videos from available audio
+    4. Download new backgrounds
+    5. Exit
+        Wachawannado? : '''
+
+bgvdMainMenu = '''
+1. Pull from a Playlist link
+2.Pull from a video link Video
+3. Download built in List of Videos Or any other key to return
+  Wachawannado? : '''
 
 
 def audioMaker(i, q):
@@ -79,7 +94,7 @@ def videoMaker():
 
 
 def backgroundVideoDownloader():
-    opt = int(input('1. Playlist\n2.Video\n3. Download built in List of Videos Or any other key to return\n  Wachawannado? : '))
+    opt = int(input(bgvdMainMenu))
     if opt == 1:
         p = Playlist(input('What is the playlist link? : '))
         n = int(input('How many videos do you want to download?\n Hit 0 for all : '))
@@ -116,10 +131,10 @@ def backgroundVideoDownloader():
             if os.path.exists('bgvideo/' + vidtitle):
                 altvidtitle = str(random.randint(100000, 1000000)) + '.mp4'
                 os.replace('tmp/' + vidtitle, 'bgvideo/' + altvidtitle)
-                print(p.title, 'downloaded as', altvidtitle)
+                print(YouTube(v).title, 'downloaded as', altvidtitle)
             else:
                 os.replace('tmp/' + vidtitle, 'bgvideo/' + vidtitle)
-                print(p.title, 'downloaded as', vidtitle)
+                print(YouTube(v).title, 'downloaded as', vidtitle)
             print(YouTube(v).title, 'downloaded')
     else:
         print('returning to main menu')
@@ -141,34 +156,33 @@ if __name__ == '__main__':
         os.mkdir('usedaudio')
     try:
         while True:
-            wachawannado = int(input(
-                '1. Make Audio from list in conditions.txt\n2. Input conditions manually to make audio\n3. Make videos from available audio\n4. Download new backgrounds\n5. Be the quitter that you are\nWachawannado? : '))
+            wachawannado = int(input(mainMenu))
             if wachawannado == 1:
                 if os.path.exists('q.txt'):
                     with open('q.txt', 'r') as q:
                         with concurrent.futures.ProcessPoolExecutor(max_workers=64) as executor:
                             for i, lines in enumerate(q):
                                 executor.submit(audioMaker, i=i, q=lines)
-
                 else:
-                    print('wheres the fucking file? Create q.txt or hit 2 in the main menu')
+                    print('q.txt not found. Create q.txt or hit 2 in the main menu')
             elif wachawannado == 2:
-                audioMaker(q=input('Type a well worded clearly formatted question: '), i=1)
+                audioMaker(q=input('Type a well worded clearly formatted question. Simple questions return very short answers: '), i=1)
             elif wachawannado == 3:
                 videoMaker()
             elif wachawannado == 4:
                 backgroundVideoDownloader()
             elif wachawannado == 5:
-                print('fuckin quitters')
+                print('Bye!')
                 break
             else:
-                print('\nWTF, try that again\n')
+                print('\nLets try again\n')
 
     except KeyboardInterrupt:
         tmpdir = os.listdir('tmp/')
         if not tmpdir:
-            print('\ntmp folder is empty, now fuck off')
+            print('\ntmp folder is empty, Bye!')
         else:
             for i, file in enumerate(tmpdir):
                 os.remove('tmp/' + file)
-            print(f'\n{i + 1} files cleared from the tmp folder. now fuck off')
+            print(f'\n{i + 1} files cleared from the tmp folder. Bye!')
+
